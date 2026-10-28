@@ -12,5 +12,4 @@ spec:
           image: guestbook:v0.1.0
           ports:
             - containerPort: 3000
-    #command: ['/bin/my-app']
-    #args: ['--migrate-db', '--db-host=12.34.56.78']
+   
