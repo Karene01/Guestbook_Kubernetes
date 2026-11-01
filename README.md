@@ -14,6 +14,7 @@ Découvertes des commandes et création de namespaces
 Déployer Redis dans le namespace data, y connecter le guestbook via une ConfigMap, et persister les données.
 
 #### Exo6 : Rendre l'application robuste avec les probes
+Permettre à Kubernetes de détecter qu’un pod est cassé ou pas prêt, et d’agir en conséquence.
 
 ### Problème rencontré et pourquoi il est survenu
 #### Exo2 : 
@@ -29,6 +30,9 @@ le statut du guestboook était resté à "unchanged" parce que j'étais dans le 
 - Les messages ont été perdus après le kubectl apply du Deployment Redis avec PVC : le nouveau pod démarrait avec un volume vide.
 - curl échouait avec "Failed to connect": le port-forward s’arrête quand le pod visé est recréé ou quand on ferme le terminal.
 
+#### Exo6 : 
+- Sans probes, les pods restaient Running alors que Redis était injoignable : Kubernetes ne sait pas que l’application ne fonctionne pas
+- Erreur de syntaxe mapping values are not allowed in this context : les probes étaient mal indentées dans le template(pas au niveau du conteneur), et YAML dépend de l’indentation
 
 ### Solution appliquée et pourquoi cette solution fonctionne
 #### Exo2 : 
@@ -42,6 +46,11 @@ lancer la commande depuis le dossier parent, remplacer les noms par {{ .Release.
 - Annotation checksum/config (hash de la ConfigMap) dans le template du pod : quand la ConfigMap change, le template change, ce qui déclenche un rolling update.
 - PVC redis-data monté sur /data : le volume survit à la suppression du pod, et Redis y relit dump.rdb.
 - helm upgrade --reset-values pour repartir des valeurs du chart, sans garder un ancien --set.
+
+#### Exo6 : 
+- Readiness probe httpGet /healthz (renvoie 500 quand Redis est injoignable): le pod est retiré des endpoints du Service tant qu’il n’est pas prêt
+- Liveness probe tcpSocket sur le port 3000, indépendante de Redis : les pods ne redémarrent pas en boucle quand Redis tombe
+- Observé avec scale deploy/redis --replicas=0 : pods 0/1, RESTARTS 0, événements Readiness probe failed (500 et context deadline exceeded), endpoints vides, Connection refused depuis un pod client. Après --replicas=1 : pods 1/1 et trafic rétabli sans intervention
 
 ### Ce que j'ai appris
 #### Exo1 : 
@@ -81,3 +90,8 @@ Handling connection for 3000
 - Un Service est joignable par <service>.<namespace>.svc.cluster.local
 - Le système de fichiers d’un conteneur est éphémère. Un PVC rend les données persistantes
 - kubectl logs, /env et /healthz sont les premiers outils de diagnostic.
+
+#### Exo6 : 
+- /healthz ne doit pas servir de liveness, sinon une panne de Redis redémarrerait tous les pods
+- kubectl port-forward service/... choisit un pod directement et ignore les endpoints : pour tester le vrai chemin, il faut passer par le Service depuis le cluster
+- kubectl get events et describe expliquent les décisions de Kubernetes
