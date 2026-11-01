@@ -8,17 +8,24 @@ Découvertes des commandes et création de namespaces
 
 #### Exo3 : Déployer le guestbook (Deployment + Service)
 
+#### Exo4 : Déployer le guestbook (Helm Chart)
+
 
 ### Problème rencontré et pourquoi il est survenu
 #### Exo2 : 
 le statut du guestboook était resté à "unchanged" parce que j'étais dans le namespace par défaut 
 
+#### Exo4 : 
+- mauvais chemin du chart selon le dossier courant
+- helm install refusé, car my-service avait été créé à la main (pas de label managed-by: Helm) et que les templates avaient encore des noms codés en dur
 
 
 ### Solution appliquée et pourquoi cette solution fonctionne
 #### Exo2 : 
 je me suis placée dans le guestbook et la commande apply a fonctionné
 
+#### Exo4 : 
+lancer la commande depuis le dossier parent, remplacer les noms par {{ .Release.Name }}, supprimer les ressources manuelles avant l’installation.
 
 ### Ce que j'ai appris
 #### Exo1 : 
@@ -46,3 +53,9 @@ my-service   ClusterIP   10.98.136.248   <none>        3000/TCP   4m41s
 Forwarding from 127.0.0.1:3000 -> 3000
 Forwarding from [::1]:3000 -> 3000
 Handling connection for 3000
+
+#### Exo4 :
+- un chart sépare la structure (templates) des paramètres (values.yaml)
+- helm template et helm lint permettent de vérifier avant de déployer
+- Helm ne reprend pas les ressources qu’il n’a pas créées
+- helm upgrade crée une nouvelle révision
