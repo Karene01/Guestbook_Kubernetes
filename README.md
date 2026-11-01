@@ -11,7 +11,7 @@ Découvertes des commandes et création de namespaces
 #### Exo4 : Déployer le guestbook (Helm Chart)
 
 #### Exo5 : Ajouter une base de données (Redis)
-
+Déployer Redis dans le namespace data, y connecter le guestbook via une ConfigMap, et persister les données.
 
 ### Problème rencontré et pourquoi il est survenu
 #### Exo2 : 
@@ -21,6 +21,12 @@ le statut du guestboook était resté à "unchanged" parce que j'étais dans le 
 - mauvais chemin du chart selon le dossier courant
 - helm install refusé, car my-service avait été créé à la main (pas de label managed-by: Helm) et que les templates avaient encore des noms codés en dur
 
+#### Exo5 : 
+- Après avoir mis une fausse valeur de REDIS_HOST, les pods ne se sont pas recréés : les variables d’environnement ne sont lues qu’au démarrage du conteneur, et un changement de ConfigMap ne modifie pas le Deployment.
+- L’application affichait "no database connexion" alors que les pods étaient Running : la fausse valeur (redis-faux) n’avait jamais été remise. Les logs montraient lookup redis-faux.data.svc.cluster.local: no such host. Sans probes, Kubernetes ne voit pas qu’une application est cassée.
+- Les messages ont été perdus après le kubectl apply du Deployment Redis avec PVC : le nouveau pod démarrait avec un volume vide.
+- curl échouait avec "Failed to connect": le port-forward s’arrête quand le pod visé est recréé ou quand on ferme le terminal.
+
 
 ### Solution appliquée et pourquoi cette solution fonctionne
 #### Exo2 : 
@@ -28,6 +34,12 @@ je me suis placée dans le guestbook et la commande apply a fonctionné
 
 #### Exo4 : 
 lancer la commande depuis le dossier parent, remplacer les noms par {{ .Release.Name }}, supprimer les ressources manuelles avant l’installation.
+
+#### Exo5 : 
+- REDIS_HOST: redis.data.svc.cluster.local : le nom court d’un Service ne se résout que dans son propre namespace, le nom complet fonctionne depuis n’importe quel namespace
+- Annotation checksum/config (hash de la ConfigMap) dans le template du pod : quand la ConfigMap change, le template change, ce qui déclenche un rolling update.
+- PVC redis-data monté sur /data : le volume survit à la suppression du pod, et Redis y relit dump.rdb.
+- helm upgrade --reset-values pour repartir des valeurs du chart, sans garder un ancien --set.
 
 ### Ce que j'ai appris
 #### Exo1 : 
@@ -61,3 +73,9 @@ Handling connection for 3000
 - helm template et helm lint permettent de vérifier avant de déployer
 - Helm ne reprend pas les ressources qu’il n’a pas créées
 - helm upgrade crée une nouvelle révision
+
+#### Exo5 : 
+- Une ConfigMap sépare la configuration du code, mais ne redémarre pas les pods toute seule
+- Un Service est joignable par <service>.<namespace>.svc.cluster.local
+- Le système de fichiers d’un conteneur est éphémère. Un PVC rend les données persistantes
+- kubectl logs, /env et /healthz sont les premiers outils de diagnostic.
