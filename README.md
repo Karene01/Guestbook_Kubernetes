@@ -17,7 +17,7 @@ Déployer Redis dans le namespace data, y connecter le guestbook via une ConfigM
 Permettre à Kubernetes de détecter qu’un pod est cassé ou pas prêt, et d’agir en conséquence.
 
 #### Exo7 : Exposer le guestbook avec un Ingress
-
+Rendre l’application accessible par un nom de domaine sans kubectl port-forward. 
 
 ### Problème rencontré et pourquoi il est survenu
 #### Exo2 : 
@@ -98,3 +98,9 @@ Handling connection for 3000
 - /healthz ne doit pas servir de liveness, sinon une panne de Redis redémarrerait tous les pods
 - kubectl port-forward service/... choisit un pod directement et ignore les endpoints : pour tester le vrai chemin, il faut passer par le Service depuis le cluster
 - kubectl get events et describe expliquent les décisions de Kubernetes
+
+#### Exo6 : 
+- Un Ingress est seulement une règle de routage, c’est le controller qui l’applique.
+- Chemin d’une requête : navigateur -> résolution du nom (/etc/hosts -> 127.0.0.1) -> tunnel -> Ingress controller (choisit la règle selon le host et le chemin) -> Service guestbook (ClusterIP, via ses endpoints) -> un des pods Ready
+- ingressClassName indique quel controller doit traiter la règle.
+- Les conditions Helm (if) permettent d’activer ou désactiver une ressource depuis values.yaml
