@@ -5,7 +5,9 @@ metadata:
   labels:
     app: guestbook
 spec:
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       app: guestbook
@@ -25,6 +27,8 @@ spec:
                 name: {{ .Release.Name }}-config
           ports:
             - containerPort: {{ .Values.service.targetPort }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
           readinessProbe:
             httpGet:
               path: /healthz
