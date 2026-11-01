@@ -10,6 +10,8 @@ Découvertes des commandes et création de namespaces
 
 #### Exo4 : Déployer le guestbook (Helm Chart)
 
+#### Exo5 : Ajouter une base de données (Redis)
+
 
 ### Problème rencontré et pourquoi il est survenu
 #### Exo2 : 
