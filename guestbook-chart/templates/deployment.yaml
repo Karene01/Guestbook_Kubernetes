@@ -13,10 +13,15 @@ spec:
     metadata:
       labels:
         app: guestbook
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     spec:
       containers:
         - name: guestbook-container
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-config
           ports:
             - containerPort: {{ .Values.service.targetPort }}
