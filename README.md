@@ -13,6 +13,8 @@ Découvertes des commandes et création de namespaces
 #### Exo5 : Ajouter une base de données (Redis)
 Déployer Redis dans le namespace data, y connecter le guestbook via une ConfigMap, et persister les données.
 
+#### Exo6 : Rendre l'application robuste avec les probes
+
 ### Problème rencontré et pourquoi il est survenu
 #### Exo2 : 
 le statut du guestboook était resté à "unchanged" parce que j'étais dans le namespace par défaut 
