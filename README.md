@@ -16,6 +16,9 @@ Déployer Redis dans le namespace data, y connecter le guestbook via une ConfigM
 #### Exo6 : Rendre l'application robuste avec les probes
 Permettre à Kubernetes de détecter qu’un pod est cassé ou pas prêt, et d’agir en conséquence.
 
+#### Exo7 : Exposer le guestbook avec un Ingress
+
+
 ### Problème rencontré et pourquoi il est survenu
 #### Exo2 : 
 le statut du guestboook était resté à "unchanged" parce que j'étais dans le namespace par défaut 

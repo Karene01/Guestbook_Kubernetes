@@ -12,3 +12,8 @@ service:
 
 config:
   redisHost: redis.data.svc.cluster.local
+
+ingress:
+  enabled: true
+  className: nginx
+  host: guestbook.local
