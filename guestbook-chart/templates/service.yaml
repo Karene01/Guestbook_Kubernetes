@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: guestbook
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app: guestbook
+  ports:
+    - name: guestbook-service
+      protocol: TCP
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
